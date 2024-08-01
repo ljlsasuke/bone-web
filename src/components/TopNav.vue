@@ -9,7 +9,7 @@
                 </div>
                 <el-dropdown>
                     <span class="el-dropdown-link">
-                        {{ userStore.userInfo.username || 'sasuke' }}
+                        {{ userStore.user || 'sasuke' }}
                         <Icon name="xiala"></Icon>
                     </span>
                     <template #dropdown>
@@ -78,7 +78,7 @@ let input = reactive({
 })
 const formRef: Ref<FormInstance | undefined> = ref<FormInstance>();
 const resetForm = (formEl: FormInstance | undefined) => {
-    if (!formEl) return;
+    if (!formEl) return alert("没有form示例的情况下进入了resetForm");//我感觉这个情况不可能发生
     formEl.resetFields(); //表单的值和校验结果都会清除掉
 }
 

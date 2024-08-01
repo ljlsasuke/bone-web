@@ -5,11 +5,10 @@ export type loginReqDataType = {
 }
 
 export type loginResDataType = {
-    token: string;
-    userInfo: {
-        username: string;
-        [key: string]: string;//考虑到userInfo以后可能扩展
-    }
+    refresh: string;
+    access: string;
+    user: string;
+    is_superuser: boolean;
 }
 
 export interface loginResType extends baseResponse {

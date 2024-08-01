@@ -25,7 +25,7 @@ export default [
         method: "get",
         response: (config: any) => {
             //有pageSize和pageNo
-            const { pageSize, pageNo } = config.query;
+            const { pageSize, pageNo, searchKeyWord } = config.query;
             const result: CaseTableItem[] = mockCaseTable(pageSize);
             return {
                 code: 200,

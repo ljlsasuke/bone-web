@@ -4,27 +4,28 @@ import type { loginReqDataType, loginResDataType } from '@/api/user/type';
 
 const useUserStore = defineStore("user", {
     state: (): loginResDataType => ({
-        token: "",
-        userInfo: {
-            username: ""
-        }
+        refresh: "",
+        access: localStorage.getItem("access") ?? "",
+        user: localStorage.getItem("user") ?? "",
+        is_superuser: false
     }),
     actions: {
         async userLogin(data: loginReqDataType) {
             let res = await login(data);
             if (res.code == 200) {
                 const data = res.data as loginResDataType;//code=200data一定存在
-                this.token = data.token;
-                this.userInfo = data.userInfo;
+                this.refresh = data.refresh;
+                this.access = data.access;
+                this.user = data.user;
+                this.is_superuser = data.is_superuser
+                localStorage.setItem("access", data.access);
+                localStorage.setItem("user", data.user);
             }
             else
-                return Promise.reject(res.message as string);
+                return Promise.reject(res.message);
         },
         async userLogout() {
-            this.token = "";
-            this.userInfo = {
-                username: ""
-            }
+
         }
     }
 })
