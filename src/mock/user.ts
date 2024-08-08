@@ -1,20 +1,20 @@
 import type { MockMethod } from "vite-plugin-mock";
-import type { loginReqDataType } from "@/api/user/type"
+import type { loginReqDataType, loginResType } from "@/api/user/type"
 export default [
     {
-        url: "/api/user/login",
+        url: "/mock/user/login",
         method: "post",
-        response: ({ body }: { body: loginReqDataType }) => {
+        response: ({ body }: { body: loginReqDataType }): loginResType => {
             const { username, password } = body;
             if (username === "admin" && password === "123456") {
                 return {
                     code: 200,
                     message: "登录成功",
                     data: {
-                        token: "admin-token",
-                        userInfo: {
-                            username: "admin",
-                        }
+                        access: "admin-token",
+                        refresh: "admin-ref",
+                        is_superuser: true,
+                        user: "admin-mock"
                     }
                 }
             }
@@ -23,7 +23,7 @@ export default [
             else
                 return {
                     code: 500,
-                    message: "用户名或密码错误"
+                    message: "用户名或密码错误mock"
                 }
         }
     }

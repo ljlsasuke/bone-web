@@ -2,7 +2,7 @@
     <div class="root-container">
         <div class="left">
             <header>
-                <img src="../assets/images/logo-title.png" alt="">
+                <img src="../../assets/images/logo-title.png" alt="">
             </header>
             <div class="image">
                 <img src="./images/login-left-image.png" alt="">

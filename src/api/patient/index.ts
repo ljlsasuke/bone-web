@@ -8,3 +8,5 @@ export function getPatientCaseList(pageNo: number, pageSize: number, searchKeyWo
         params: { page: pageNo, search: searchKeyWord }
     })
 }
+
+export const uploadFileUrl = "";
