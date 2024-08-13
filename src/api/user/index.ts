@@ -9,6 +9,14 @@ export function login(data: loginReqDataType) {
     })
 }
 
+export function getNewToken(refresh: string) {
+    return request<any, any>({
+        url: '/user/login/refresh',
+        method: 'post',
+        data: { refresh: refresh }
+    })
+}
+
 export function logout() {
 
 }

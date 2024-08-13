@@ -68,7 +68,6 @@
 <script lang="ts" setup>
 import { ref, watch, onMounted } from "vue";
 import usePatientStore from "@/stores/modules/patient";
-import { dot } from "node:test/reporters";
 const patientStore = usePatientStore();
 const operationGroup = [
   // {
@@ -210,12 +209,14 @@ const onSuerTest = () => {
     })
     .then((res) => {
       if (res.code !== 200) return alert("图片分割失败");
-      const mask = new Image();
-      mask.src = `data:image/jpeg;base64,${res.data}`;
-      mask.onload = () => {
+      const {img_segment,img_binary:mask} = res.data;
+      patientStore.mask = mask;
+      const segment = new Image();//
+      segment.src = `data:image/png;base64,${img_segment}`;//每次返回的mask是最后表单想要提交的
+      segment.onload = () => {
         //图片加载是一个异步事件
         saveCtxState();
-        ctx.drawImage(mask, 0, 0);
+        ctx.drawImage(segment, 0, 0);
         dots.forEach((dot) => {
           drawPoint(dot);
         });
@@ -223,7 +224,9 @@ const onSuerTest = () => {
     }).finally(() => isLoading.value = false)
 };
 
-const onSubmit = () => {};
+const onSubmit = () => {
+    patientStore.isFeaturePointsDrawerShow  = false;
+};
 
 onMounted(() => {
   // console.log(imageCanvas,"示例")
@@ -234,6 +237,7 @@ onMounted(() => {
 .content {
   display: flex;
   justify-content: space-between;
+  width: auto;
   .operation {
     display: flex;
     flex-direction: column;

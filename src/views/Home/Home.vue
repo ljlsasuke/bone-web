@@ -21,15 +21,15 @@
                 <el-table class="table" :data="CaseList"
                     :header-cell-style="{  fontSize: '14px',color:'black',backgroundColor:'#f5f7fa' }">
                     <el-table-column label="序号" type="index" width="80" align="center" />
-                    <el-table-column prop="patient" label="病人姓名" />
+                    <el-table-column prop="patient_name" label="病人姓名" />
                     <el-table-column prop="doctor" label="上传人" />
                     <el-table-column prop="created" label="上传日期" />
                     <el-table-column label="操作" align="center">
-                        <template #default>
-                            <span class="bt">查看预测</span>
+                        <template #default="{row}:{row:CaseTableItem}">
+                            <span class="bt" @click="toCaseCalculateResult(row.patient_id)">查看预测</span>
                             <span class="bt">更新病例信息</span>
                         </template>
-                        </ el-table-column>
+                    </el-table-column>
                 </el-table>
 
                 <el-pagination class="pagination" background layout="prev, pager, next" :page-size="pageSize"
@@ -77,9 +77,10 @@
                 <div class="form-card">
                     <h1 class="form-card-title">病例辅助材料</h1>
                     <div class="form">
-                        <!-- <el-upload class="upload-demo"
-                            @change="test"
+                        <el-upload class="upload-demo"
+                            @change="onFileSelected"
                             accept="image/*"
+                            :before-upload="() => false"
                             >
                             <el-button type="primary">
                                 <template #icon>
@@ -88,12 +89,12 @@
                                 上传
                             </el-button>
                             <template #tip>
-                                <div class="el-upload__tip">
+                                <!-- <div class="el-upload__tip">
                                     jpg/png files with a size less than 500kb
-                                </div>
+                                </div> -->
                             </template>
-                        </el-upload> -->
-                        <input type="file" id="imageInput" accept="image/*"  @change="test"><br><br>
+                        </el-upload>
+                        <!-- <input type="file" id="imageInput" accept="image/*"  @change="onFileSelected"><br><br> -->
                         <FeaturePoints></FeaturePoints>
                     </div>
                 </div>
@@ -109,14 +110,17 @@
 <script lang="ts" setup>
 import { ref,watch,onMounted } from "vue";
 import type { Ref } from "vue";
+import {dayjs} from "element-plus"
+import { useRouter } from "vue-router";
 import FeaturePoints from "./component/FeaturePoints.vue";
 import useUserStore from "@/stores/modules/user";
-import {getPatientCaseList,uploadFileUrl} from "@/api/patient/index"
+import {getPatientCaseList} from "@/api/patient/index"
 import type {CaseTableItem,CaseListResDataType} from "@/api/patient/type"
 import type {  FormRules,FormInstance,UploadProps, UploadUserFile  } from 'element-plus'
 import usePatientStore from "@/stores/modules/patient";
 const patientStore = usePatientStore();
 const userStore = useUserStore();
+const $router = useRouter();
 let pageNo = ref<number>(1);
 let pageSize = ref<number>(10);
 let total = ref<number>(0);
@@ -124,8 +128,7 @@ let searchKeyWord = ref<string>("");
 let CaseList = ref<CaseTableItem[]>([]);
 
 function translateTime(time:string) {
-    const date = new Date(time);
-    return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDay()}`;
+    return dayjs(time).format("YYYY-MM-DD");
 }
 
 let updatePatientCaseList = async () => {
@@ -148,6 +151,11 @@ const toSearch = async () => {
     // searchKeyWord.value = "";
 }
 
+const toCaseCalculateResult = (patient_id:string) =>{
+    $router.push({name:"result",query:{patient_id}});
+}
+
+
 let isDrawerShow = ref(false);
 const [formRefP,formRefD]: Ref<FormInstance | undefined>[] = [ref<FormInstance>(),ref<FormInstance>()];
 const resetForm = (formElP: FormInstance | undefined,formElD:FormInstance | undefined) => {
@@ -157,19 +165,14 @@ const resetForm = (formElP: FormInstance | undefined,formElD:FormInstance | unde
     formElD?.resetFields();//这个formElD后续可能被移除
 }
 
-function test(event){
-    const file = event.target.files[0];
-
-    
+function onFileSelected(event:any){
+    const file = event.raw || (event.target.files as FileList) [0];
     if(file){
-        // patientStore.isFeaturePointsDrawerShow = true;
-        // patientStore.imageData = file;
         const reader = new FileReader();
         reader.onload = (e) => {
-            console.log("nishdai");
-            
+
             patientStore.imageData = file;
-            patientStore.imgSrc = e.target.result;
+            patientStore.imgSrc = (e.target as FileReader).result;
             patientStore.isFeaturePointsDrawerShow = true;
         }
         reader.readAsDataURL(file);
@@ -190,10 +193,12 @@ onMounted(updatePatientCaseList);
     .content {
         padding: 15px;
         // height: calc(100vh - $header-height);
-
+        background-color: #f4f8fb;
         .card {
             height: 100%;
             // padding: 20px;
+            box-shadow: 0px 0px 10px 0px rgba(16,56,135,0.19);
+            border-radius: 10px;
             .header {
                 display: flex;
                 justify-content: space-between;
