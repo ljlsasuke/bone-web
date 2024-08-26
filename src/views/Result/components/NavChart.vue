@@ -19,12 +19,13 @@
 
 <script lang="ts" setup>
 import { ref,watch } from "vue";
+import type {ChartDateType} from "@/api/patient/type"
 import * as echarts from 'echarts';
 import { dayjs } from "element-plus";
 import type { TabsPaneContext } from 'element-plus'
 const names = ["颈干角","TAD","假体髓腔占比面积","阳（阴）性支撑","骨密度"];
 let activeName = ref(names[0]);
-const props = defineProps(['chartData']);
+const props = defineProps<{chartData:ChartDateType}>();
 let doms:any[] = [];
 let options:any[] = [];
 const handleClick = (tab: TabsPaneContext, event: Event) => {
@@ -88,7 +89,7 @@ watch(() => props.chartData,() =>{
     },
     series: [
       {
-        data: props.chartData.negativeSupportList.map((item:any) => item || 0),
+        data: props.chartData.medullaryCavityList.map((item:any) => item || 0),
         type: 'line'
       }
     ]
@@ -107,7 +108,7 @@ watch(() => props.chartData,() =>{
     },
     series: [
       {
-        data: props.chartData.neckShaftAngleList.map((item:any) => item || 0),
+        data: props.chartData.negativeSupportList.map((item:any) => item || 0),
         type: 'line'
       }
     ]

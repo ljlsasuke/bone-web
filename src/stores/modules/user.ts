@@ -37,13 +37,13 @@ const useUserStore = defineStore("user", {
             localStorage.clear();
         },
 
-        $reset() {
-            this.refresh = ""
-            this.access = ""
-            this.user = ""
-            this.is_superuser = false
-            this.refreshTimer = 0
-        },
+        // $reset() {
+        //     this.refresh = ""
+        //     this.access = ""
+        //     this.user = ""
+        //     this.is_superuser = false
+        //     this.refreshTimer = 0
+        // },
 
         async toRefreshToken() {//登录成功之后开始设定token刷新规则,暂时设置为两分钟刷新一次
             console.log("设置token刷新规则");

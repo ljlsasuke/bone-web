@@ -1,5 +1,5 @@
 import request from "@/utils/request";
-import type { CaseListResType } from "./type"
+import type { CaseListResType, caseType, patientType } from "./type"
 export function getPatientCaseList(pageNo: number, pageSize: number, searchKeyWord: string) {
     return request<any, CaseListResType>({
         url: "/case/list",
@@ -10,21 +10,38 @@ export function getPatientCaseList(pageNo: number, pageSize: number, searchKeyWo
 }
 
 //更新病例的时候先根据id获取到旧的病例数据
-export function getPatientCaseById() {
-
-}
-
-//新增或者是更新一条病例，区别应该就是更新的时候要先根据id得到旧的病例数据，在根据id给出新的病例数据
-export function updatePatientCaseList() {
-    return request({
-        url: "",
-        method: "post",
-        data: {}
+export function getPatientCaseById(id: string) {
+    return request<any, any>({
+        url: "/patient",
+        method: "get",
+        params: { patient_id: id }
     })
 }
 
-export function getMask() {//把那个原先的fetch请求移植到这里
 
+export function addPatient(data: patientType) {
+    return request({
+        url: "/patients/",
+        method: "post",
+        data: data
+    })
+}
+
+//传入两张图片（原图和mask图），病人ID，医生姓名，最后得到计算结果
+export function calculate(caseData: caseType) {
+    return request<any, any>({
+        url: "/records/create/",
+        method: "post",
+        data: caseData
+    })
+}
+
+export function getMask(formData: any) {//把那个原先的fetch请求移植到这里
+    return request({
+        url: "/cv/get-mask/",
+        method: "post",
+        data: formData
+    })
 }
 
 //点击查看预测的时候根据ID获得到一个病例信息

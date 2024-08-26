@@ -67,6 +67,8 @@
 
 <script lang="ts" setup>
 import { ref, watch, onMounted } from "vue";
+import {ElMessage} from "element-plus"
+import {getMask} from "@/api/patient"
 import usePatientStore from "@/stores/modules/patient";
 const patientStore = usePatientStore();
 const operationGroup = [
@@ -170,7 +172,10 @@ function removeArea(event: MouseEvent) {
 }
 
 function undoLastArea() {
-  if (ctxStates.length === 0) return alert("没有选择的特征点");
+  if (ctxStates.length === 0) return ElMessage({
+        type:"error",
+        message:"没有选择的特征点"
+    })
   dots.pop();
   ctx.putImageData(ctxStates.pop() as ImageData, 0, 0);
 }
@@ -182,7 +187,10 @@ function saveCtxState() {
 }
 
 function clearAllArea() {
-  if (dots.length === 0) return alert("没有选择的特征点"); //这里用dots或ctxStates的length都可以
+  if (dots.length === 0) return ElMessage({
+        type:"error",
+        message:"没有选择的特征点"
+    }) //这里用dots或ctxStates的length都可以
   dots = [];
   ctx.putImageData(ctxStates[0] as ImageData, 0, 0);
   ctxStates = []; //如果重置可以撤销的话可以不写这个并且在改一点逻辑
@@ -200,6 +208,7 @@ const onSuerTest = () => {
     formData.append("image", patientStore.imageData);
   }
   isLoading.value = true;
+  // getMask(formData).then((res) => console.log(res,"nihao"))
   fetch("http://192.168.200.13:8000/api/cv/get-mask/", {
     method: "POST",
     body: formData,
@@ -208,8 +217,11 @@ const onSuerTest = () => {
       return res.json();
     })
     .then((res) => {
-      if (res.code !== 200) return alert("图片分割失败");
-      const {img_segment,img_binary:mask} = res.data;
+      if (res.code !== 200) return ElMessage({
+        type:"error",
+        message:"图片分割失败"
+    });
+      const {img_segment,img_binary:mask} = res;
       patientStore.mask = mask;
       const segment = new Image();//
       segment.src = `data:image/png;base64,${img_segment}`;//每次返回的mask是最后表单想要提交的
@@ -222,6 +234,7 @@ const onSuerTest = () => {
         });
       };
     }).finally(() => isLoading.value = false)
+
 };
 
 const onSubmit = () => {

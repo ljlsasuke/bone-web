@@ -50,6 +50,10 @@
 
                         </div>
                         <div class="chart">
+                            <div class="export-button" @click="handlerExportData">
+                                <Icon name="daochushuju"style="color:#8abe2d" />
+                                导出数据
+                            </div>
                         <NavChart :chartData="chartData"></NavChart>
                         </div>
                     </div>
@@ -62,12 +66,16 @@
 
 <script lang="ts" setup>
 import { ref,onMounted ,reactive} from "vue";
+import * as XLSX from 'xlsx';
 import { Thumbs } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/vue';
+import { ElMessage,dayjs} from "element-plus"
 import NavChart from "./components/NavChart.vue";
 import {getCalculateResult} from "@/api/patient"
+import type {ChartDateType} from "@/api/patient/type"
 import {useRoute,useRouter} from "vue-router"
 import 'swiper/css';
+import { number } from "echarts";
 const $route = useRoute();
 const $router = useRouter();
 const thumbsSwiper = ref(null);
@@ -77,19 +85,6 @@ const setThumbsSwiper = (swiper:any) => {
 const images:string[] = [];
 let patient_id = ref("");
 let patient_name = ref("");
-type ChartDateType = {
-    neckShaftAngleList:(number | null)[],//颈干角
-    TADList:(number | null)[],//TAD
-    medullaryCavityList:(number | null)[],//假体髓腔占比面积
-    negativeSupportList:(number | null)[],//阳（阴）性支撑
-    timeList:string[],
-    neckOfFemur:{
-        neckOfFemur1:number | null,
-        neckOfFemur2:number | null,
-        neckOfFemur3:number | null,
-        neckOfFemur4:number | null,
-    }[]//骨密度
-}
 let chartData:ChartDateType = reactive({
     neckShaftAngleList:[],//颈干角
     TADList:[],//TAD
@@ -98,11 +93,15 @@ let chartData:ChartDateType = reactive({
     timeList:[],
     neckOfFemur:[]
 });
-let isSuccess = ref(false);//手术是否成功
+let isSuccess = ref(true);//手术是否成功
+const dataToExport:exportDataType[] = [];
 const init = async () => {
     let id = $route.query.patient_id as string;
     let res = await getCalculateResult(id);
-    if(res.code !== 201) return alert("获取预测结果失败！");
+    if(res.code !== 201) return ElMessage({
+        type:"error",
+        message:"获取预测结果失败！"
+    })
     let {data} = res;
     console.log(data,"返回数据样子");
     patient_id.value = data[0].patient_id;
@@ -121,7 +120,49 @@ const init = async () => {
             neckOfFemur4:item.neckOfFemur4,
         });  
         chartData.timeList.push(item.created);
+        dataToExport.push({
+            "患者姓名": item.patient_name,
+            "患者ID": item.patient_id,
+            "时间": dayjs(item.created).format("YYYY-MM-DD"),
+            "股骨颈": item.neckOfFemur1,
+            "股骨粗隆": item.neckOfFemur2,
+            "股骨粗隆间": item.neckOfFemur3,
+            "全髋": item.neckOfFemur4,
+            "颈干角": item.neckShaftAngle,
+            "TAD": item.TAD,
+            "假体髓腔占比面积": item.medullaryCavity,
+            "阴（阳）性支撑": item.negativeSupport,
+        })
     })
+}
+interface exportDataType {
+    "患者姓名": string,
+    "患者ID": string,
+    "时间": string,
+    "股骨颈": number,
+    "股骨粗隆": number,
+    "股骨粗隆间": number,
+    "全髋": number,
+    "颈干角": number | null,
+    "TAD": number | null,
+    "假体髓腔占比面积": number | null,
+    "阴（阳）性支撑": number | null, 
+}
+const handlerExportData =  () =>{
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = { Sheets: { 'data': worksheet }, SheetNames: ['data'] };
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+
+    // 创建 Blob 对象
+    const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+
+    // 创建临时链接元素
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'exportedData.xlsx';
+    link.click();
+    // 清除临时链接
+    URL.revokeObjectURL(link.href);
 }
 onMounted(() => {
     init();
@@ -253,12 +294,20 @@ onMounted(() => {
                         }
                     }
                     .chart {
+                        position: relative;
                         margin-left: 24px;
                         padding-left: 24px;
                         width: 920px;
                         height: 400px;
-
                         border-left: 1px solid #D8DCE6 ;
+                        .export-button {
+                            position: absolute;
+                            z-index: 1;
+                            top:12px;
+                            right:20px;
+                            font-size: 14px;
+                            cursor: pointer;
+                        }
                     }
                 }
             }
