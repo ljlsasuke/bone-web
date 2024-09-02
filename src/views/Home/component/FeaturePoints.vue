@@ -209,7 +209,7 @@ const onSuerTest = () => {
   }
   isLoading.value = true;
   // getMask(formData).then((res) => console.log(res,"nihao"))
-  fetch("http://192.168.200.13:8000/api/cv/get-mask/", {
+  fetch(`${import.meta.env.VITE_APP_SERVE}/api/cv/get-mask/`, {
     method: "POST",
     body: formData,
   })

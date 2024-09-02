@@ -8,8 +8,8 @@ function mockCaseTable(size: number = 10): CaseTableItem[] {
     const { Random } = mock;
     for (let i = 0; i < size; i++) {
         const item: CaseTableItem = {
-            id: Random.guid(), // 生成一个 GUID 作为病人 ID
-            patient: Random.cname(), // 生成一个随机的中文姓名
+            patient_id: Random.guid(), // 生成一个 GUID 作为病人 ID
+            patient_name: Random.cname(), // 生成一个随机的中文姓名
             doctor: Random.cname(), // 生成一个随机的中文姓名作为医生姓名
             // uploadTime: new Date(Random.date()), // 生成一个随机日期，并转换为 Date 对象
             created: Random.date()
