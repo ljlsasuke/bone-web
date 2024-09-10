@@ -51,7 +51,7 @@ const login = () => {
 
         $router.push("/home");
     }).catch(err => {
-        isLoginRejected.value = true
+        if(err.response.status === 401) isLoginRejected.value = true
         console.log("登录失败");
     });
 
@@ -63,6 +63,7 @@ const login = () => {
 $header-height: 30px;
 $left-width: 900;
 $right-width: 540;
+$all-width:$left-width + $right-width;
 $form-width: 320;
 
 .root-container {
@@ -70,11 +71,12 @@ $form-width: 320;
     flex-direction: row;
     height: 100vh;
 
-    //由于使用了flex布局，left和right默认flex-shrink默认都为1，left和right的宽度会按照900:540（flex-basis）的比例放缩
     .left {
         display: flex;
         flex-direction: column;
         width: #{$left-width}px;
+        flex:1;
+        // width:calc(100% * ($left-width / $all-width));
         height: 100%;
         background: #fff;
         $header-margin-top: 20px;
@@ -109,6 +111,8 @@ $form-width: 320;
         justify-content: center;
         align-items: center;
         width: #{$right-width}px;
+        flex:1;
+        // width:calc(100% * ($right-width / $all-width));
         height: 100%;
 
         .form {

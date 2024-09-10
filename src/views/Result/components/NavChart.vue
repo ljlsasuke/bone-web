@@ -28,11 +28,14 @@ let activeName = ref(names[0]);
 const props = defineProps<{chartData:ChartDateType}>();
 let doms:any[] = [];
 let options:any[] = [];
+const hasChartTabItem = new Set();//已经有过初始化图标的tab项
 const handleClick = (tab: TabsPaneContext, event: Event) => {
   const activeIndex = Number(tab.index);
   if(activeIndex === 4) return;
+  if(hasChartTabItem.has(activeIndex)) return;
   let myChart = echarts.init(doms[activeIndex]);//会有重复渲染，但是echarts本身会阻止这个行为
   myChart.setOption(options[activeIndex]);
+  hasChartTabItem.add(activeIndex);
 }
 let tableData = ref<any>([]);
 watch(() => props.chartData,() =>{
@@ -122,6 +125,7 @@ watch(() => props.chartData,() =>{
   })
   let myChart = echarts.init(doms[0]);
   myChart.setOption(options[0]);
+  hasChartTabItem.add(0);
 },{deep:true});
 
 </script>

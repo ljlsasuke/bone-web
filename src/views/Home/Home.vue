@@ -47,10 +47,10 @@
                     <h1 class="form-card-title">病人基本信息</h1>
                     <el-form label-position="left" label-width="80" ref="formRefP" class="form" :model="patientData">
                         <el-form-item label="病人姓名" prop="patient_name">
-                            <el-input placeholder="请输入病人姓名" v-model="patientData.patient_name"></el-input>
+                            <el-input placeholder="请输入病人姓名" v-model="patientData.patient_name" :disabled="drawerTitle==='更新病例信息'"></el-input>
                         </el-form-item>
                         <el-form-item label="患者ID" prop="patient_id">
-                            <el-input placeholder="请输入患者ID" v-model="patientData.patient_id"></el-input>
+                            <el-input placeholder="请输入患者ID" v-model="patientData.patient_id" :disabled="drawerTitle==='更新病例信息'"></el-input>
                         </el-form-item>
                         <el-form-item label="年龄" prop="age">
                             <!-- <el-input-number v-model="patientData.age" /> -->
@@ -166,6 +166,7 @@ const resetForm = (formElP: FormInstance | undefined,formElD:FormInstance | unde
     // formEl.resetFields(); //表单的值和校验结果都会清除掉
     formElP?.resetFields();
     formElD?.resetFields();//这个formElD后续可能被移除
+    patientStore.$reset();
 }
 
 function onFileSelected(event:any){
@@ -208,17 +209,20 @@ const handleUpdateCase = async (patient_id:string) =>{
 }
 
 const onSubmit = async () => {
-    let res1 = await addPatient(patientData);
+    if(drawerTitle.value === "上传新病例"){
+        await addPatient(patientData);
+    }
     let res2 = await calculate({
         patient_id: patientData.patient_id,
         doctor: "admin",
         image_origin: patientStore.imgSrc.slice(patientStore.imgSrc.indexOf(",") + 1),
         image_binary: patientStore.mask
     });
+
     $router.push({name:"result",query:{patient_id:res2.data.patient_id}});
 }
 
-watch([pageNo,pageSize],updatePatientCaseList);//还不确定要不要让pageSize变化
+watch(pageNo,updatePatientCaseList);
 onMounted(updatePatientCaseList);
 </script>
 
@@ -262,8 +266,8 @@ onMounted(updatePatientCaseList);
                 }
             }
             .pagination {
-                margin: 20px auto;
-                max-width: 435px;
+                margin-top: 20px;
+                justify-content: center;
             }
             
         }

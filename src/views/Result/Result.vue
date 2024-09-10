@@ -26,25 +26,31 @@
                 </div>
                 <div class="result">
                     <div class="true-or-false">
-                        <h1>手术预测</h1>
-                        <h2 :class="{success:isSuccess,fail:!isSuccess}">
+                        <h1>手术预测</h1> 
+                         <h2 :class="{success:isSuccess,fail:!isSuccess}">
                             <Icon name="yuce_chenggong" style="font-size: 40px;"></Icon>
                             {{ isSuccess ? '成功' : '失败' }}
                         </h2>
+                        <!-- <h1>手术成功率：</h1>
+                        <h2 class="success">
+                            {{ 94.9}}%
+                        </h2> -->
                     </div>
                     <div class="detail">
                         <div class="image-swiper">
                             <swiper :modules="[Thumbs]" :thumbs="{ swiper: thumbsSwiper }" :slides-per-view="1"
-                                :space-between="10">
+                                :space-between="10" @slideChange="handleSlideChange">
                                 <swiper-slide v-for="(slide,index) in images" :key="index" class="main-image-container">
                                     <img :src="slide" style="width: 100%;">
                                 </swiper-slide>
                             </swiper>
                             <swiper :modules="[Thumbs]" watch-slides-progress @swiper="setThumbsSwiper"
-                                :slides-per-view="4" :space-between="10">
+                                :slides-per-view="4" :space-between="10" class="all-thumbs-image-container">
                                 <swiper-slide v-for="(slide,index) in images" :key="index"
-                                    class="thumbs-image-container" :class="{selected:true}">
-                                    <img :src="slide" style="width: 100%;" />
+                                    class="thumbs-image-item-container" :class="{selected:activeIndex === index}">
+                                    <div class="fix">
+                                        <img :src="slide" style="width: 100%;" />
+                                    </div>
                                 </swiper-slide>
                             </swiper>
 
@@ -53,6 +59,18 @@
                             <div class="export-button" @click="handlerExportData">
                                 <Icon name="daochushuju"style="color:#8abe2d" />
                                 导出数据
+                            </div>
+                            <div class="now-infer">
+                                <span><b>颈干角：</b>{{ nowInferData["颈干角"]?.toFixed(2) }}</span>
+                                <span><b>TAD：</b>{{ nowInferData["TAD"]?.toFixed(2) }}</span>
+                                <span><b>假体髓腔占比面积：</b>{{ nowInferData["假体髓腔占比面积"]?.toFixed(2) }}</span>
+                                <span><b>阴（阳）性支撑：</b>{{ nowInferData["阴（阳）性支撑"]?.toFixed(2) }}</span>
+                            </div>
+                            <div class="now-infer">
+                                <span><b>股骨颈：</b>{{ nowInferData["股骨颈"]?.toFixed(2) }}</span>
+                                <span><b>股骨粗隆：</b>{{ nowInferData["股骨粗隆"]?.toFixed(2) }}</span>
+                                <span><b>股骨粗隆间：</b>{{ nowInferData["股骨粗隆间"]?.toFixed(2) }}</span>
+                                <span><b>全髋：</b>{{ nowInferData["全髋"]?.toFixed(2) }}</span>
                             </div>
                         <NavChart :chartData="chartData"></NavChart>
                         </div>
@@ -75,13 +93,32 @@ import {getCalculateResult} from "@/api/patient"
 import type {ChartDateType} from "@/api/patient/type"
 import {useRoute,useRouter} from "vue-router"
 import 'swiper/css';
-import { number } from "echarts";
 const $route = useRoute();
 const $router = useRouter();
 const thumbsSwiper = ref(null);
 const setThumbsSwiper = (swiper:any) => {
   thumbsSwiper.value = swiper;
 };
+const dataToExport:exportDataType[] = [];
+let nowInferData = ref<exportDataType>({//当前选中图片这次推测的数据
+            "患者姓名": "",
+            "患者ID": "",
+            "时间": "",
+            "股骨颈": 0,
+            "股骨粗隆": 0,
+            "股骨粗隆间": 0,
+            "全髋": 0,
+            "颈干角": -1,
+            "TAD": null,
+            "假体髓腔占比面积": null,
+            "阴（阳）性支撑": null,
+        });
+
+let activeIndex = ref(0);
+const handleSlideChange = (swiper:any) => {
+    activeIndex.value = swiper.activeIndex;
+    nowInferData.value = dataToExport[swiper.activeIndex];
+}
 const images:string[] = [];
 let patient_id = ref("");
 let patient_name = ref("");
@@ -94,7 +131,7 @@ let chartData:ChartDateType = reactive({
     neckOfFemur:[]
 });
 let isSuccess = ref(true);//手术是否成功
-const dataToExport:exportDataType[] = [];
+
 const init = async () => {
     let id = $route.query.patient_id as string;
     let res = await getCalculateResult(id);
@@ -103,7 +140,6 @@ const init = async () => {
         message:"获取预测结果失败！"
     })
     let {data} = res;
-    console.log(data,"返回数据样子");
     patient_id.value = data[0].patient_id;
     patient_name.value = data[0].patient_name;
     isSuccess.value = Boolean(data.at(-1).data);//这个是1或0
@@ -134,6 +170,7 @@ const init = async () => {
             "阴（阳）性支撑": item.negativeSupport,
         })
     })
+    nowInferData.value = dataToExport[0];
 }
 interface exportDataType {
     "患者姓名": string,
@@ -272,26 +309,34 @@ onMounted(() => {
                             border-radius: 6px;
                             overflow: hidden; 
                         }
-                        .thumbs-image-container {
-                            position: relative;
+                        .all-thumbs-image-container {
                             margin-top: 10px;
-                            width: 25%;
-                            height: 80px;
-                            overflow: hidden; 
-                            border-radius: 6px;
+                            padding:4px;
 
+                            .thumbs-image-item-container {
+                                position: relative;
+                                width: 25%;
+                                height: 80px;
+                                border-radius: 6px;
+
+                                .fix {
+                                    height: 100%;
+                                    overflow: hidden; 
+                                }
                             &.selected::after {
-                                //目前由于overflow:hidden的原因,边框显示不出来
                                 content: "";
                                 position: absolute;
-                                top: -2px;
-                                left: -2px;
-                                right: -2px;
-                                bottom: -2px;
-                                border: 1px solid var(--el-color-primary);
+                                top: -4px;
+                                left: -4px;
+                                right: -4px;
+                                bottom: -4px;
+                                border: 2px solid var(--el-color-primary);
+                                border-radius: 6px;
                             }
 
                         }
+                        }
+
                     }
                     .chart {
                         position: relative;
@@ -303,10 +348,21 @@ onMounted(() => {
                         .export-button {
                             position: absolute;
                             z-index: 1;
-                            top:12px;
+                            top:54px;
                             right:20px;
                             font-size: 14px;
                             cursor: pointer;
+                        }
+                        .now-infer {
+                            &:nth-child(2) {
+                               margin-bottom: 10px;
+                            }
+                            span {
+                                margin-right: 8px;
+                                b {
+                                    font-weight: 700;
+                                }
+                            }
                         }
                     }
                 }

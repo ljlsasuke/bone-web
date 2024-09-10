@@ -21,9 +21,9 @@ request.interceptors.response.use(response => response.data,
 
         let errorMessage: string = "";
         switch (status) {
-            case 401:
-                errorMessage = "token过期";
-                break;
+            // case 401:
+            //     errorMessage = "token过期";
+            //     break;
             case 500:
                 errorMessage = "服务器内部错误"
                 break;

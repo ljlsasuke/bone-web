@@ -5,6 +5,7 @@
     direction="btt"
     style="border-radius: 10px 10px 0px 0px"
     @opened="onOpen"
+    @closed="onClose"
   >
     <template #header>
       <h1 style="color: black; font-weight: 800">特征点选择</h1>
@@ -157,7 +158,6 @@ function addArea(event: MouseEvent) {
   saveCtxState();
   drawPoint({ x, y, label: 1 });
   dots.push({ x, y, label: 1 });
-  console.log(dots);
 }
 
 function removeArea(event: MouseEvent) {
@@ -168,7 +168,6 @@ function removeArea(event: MouseEvent) {
   saveCtxState();
   drawPoint({ x, y, label: 0 });
   dots.push({ x, y, label: 0 });
-  console.log(dots);
 }
 
 function undoLastArea() {
@@ -183,7 +182,7 @@ function undoLastArea() {
 function saveCtxState() {
   ctxStates.push(
     ctx.getImageData(0, 0, imageCanvas.value.width, imageCanvas.value.height)
-  );
+  );//内存泄漏可能是因为这个
 }
 
 function clearAllArea() {
@@ -238,12 +237,17 @@ const onSuerTest = () => {
 };
 
 const onSubmit = () => {
+    if(!patientStore.mask || !patientStore.imgSrc) return ElMessage({
+        type:"error",
+        message:"未确定预测图片"
+    });
     patientStore.isFeaturePointsDrawerShow  = false;
 };
-
-onMounted(() => {
-  // console.log(imageCanvas,"示例")
-});
+const onClose = () => {
+  dots = [];
+  ctxStates = [];
+  console.log("清楚了dots和ctxStates");
+}
 </script>
 
 <style lang="scss" scoped>
