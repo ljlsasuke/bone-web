@@ -102,6 +102,18 @@
                         <FeaturePoints></FeaturePoints>
                     </div>
                 </div>
+                <el-dialog v-model="waitResultShow" class="wait-dialog" :show-close="false">
+                   <div class="wait-result">
+                    <div class="img-container">
+                        <img src="./images/analysis.png" alt="">
+                    </div>
+                    <span class="analysis-status">
+                        {{ isWaitResult ? '已上传成功，正在分析...' : '分析完成' }}
+                    </span>
+                    <el-progress :percentage="percentage" :show-text="false" style="width: 100%;"/>
+                    <el-button :type="isWaitResult ? 'info' : 'primary'" style="margin: 20px auto; width: 40%;" @click="toCaseCalculateResult(thisCalculatePatientId)" :disabled="isWaitResult">{{ isWaitResult ? '等待分析完成' : '查看结果' }}</el-button>
+                   </div>
+                </el-dialog>
             </template>
             <template #footer>
                 <el-button @click="isDrawerShow=false;">取消</el-button>
@@ -207,19 +219,25 @@ const handleUpdateCase = async (patient_id:string) =>{
     })
     Object.assign(patientData,res.data[0])
 }
+let percentage = ref(0);
 
+let waitResultShow = ref(false)
+let thisCalculatePatientId:string; 
+let isWaitResult = ref(true);
 const onSubmit = async () => {
     if(drawerTitle.value === "上传新病例"){
         await addPatient(patientData);
     }
+    waitResultShow.value = true;
     let res2 = await calculate({
         patient_id: patientData.patient_id,
         doctor: "admin",
         image_origin: patientStore.imgSrc.slice(patientStore.imgSrc.indexOf(",") + 1),
         image_binary: patientStore.mask
     });
-
-    $router.push({name:"result",query:{patient_id:res2.data.patient_id}});
+    thisCalculatePatientId = res2.data.patient_id;
+    isWaitResult.value = false;
+    percentage.value = 100;//进度条暂时先这样
 }
 
 watch(pageNo,updatePatientCaseList);
@@ -294,5 +312,27 @@ onMounted(updatePatientCaseList);
             padding-right: 20px;
         }
     }
+    .wait-result {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        .analysis-status {
+            margin: 20px 0;
+            color: #c2c4c4;
+        }
+        .img-container {
+            width: 100%;
+            height: 240px;
+            overflow: hidden;
+            img {
+                display: block;
+                margin: 0 auto;
+                width: 60%;
+            }
+        }
+
+    }
+    
+
 }
 </style>
