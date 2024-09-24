@@ -1,33 +1,53 @@
-# bone-web
+## 启动项目
 
-This template should help get you started developing with Vue 3 in Vite.
-
-## Recommended IDE Setup
-
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
-
-## Type Support for `.vue` Imports in TS
-
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vitejs.dev/config/).
-
-## Project Setup
+### 下载依赖
 
 ```sh
 npm install
 ```
 
-### Compile and Hot-Reload for Development
+### 本地启动
 
 ```sh
 npm run dev
 ```
 
-### Type-Check, Compile and Minify for Production
+### 打包上线
 
 ```sh
 npm run build
 ```
+
+## 项目简介
+
+### 首页
+
+![img](./pics/UI3.png)
+![img](./pics/UI5.png)
+
+- 点击上传新病例，填写信息并点击上传按钮上传病例文件（现在为图片文件）进入特征点选择界面
+- 点击查看预测查看这个病人的所有预测
+- 点击更新病例信息为病人添加新的病例文件
+
+### 特征点选择界面
+
+![img](./pics/UI2.png)
+
+- 点击确定按钮表示用现在选取的特征点去**分割图片**
+- 点击提交按钮表示确认用现在的图片分割结果去**计算数据并预测手术成功率**
+- 点击左键添加蓝色特征点，表示添加这部分区域
+- 点击右键添加红色特征点，表示去除这部分区域
+- 点击重置按钮清除所有特征点
+- 点击撤销按钮撤销上一次的操作
+
+### 图片分割结果
+
+![img](./pics/UI4.png)
+
+### 分析结果页面
+
+![img](./pics/UI1.png)
+
+- 切换图片可以看到这次预测的全部数据
+- 在图表中可以看到每个具体数据的随时间的变化折线图
+- 点击导出数据导出病例全部数据为xlsx文件

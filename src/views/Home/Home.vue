@@ -229,6 +229,7 @@ const onSubmit = async () => {
         await addPatient(patientData);
     }
     waitResultShow.value = true;
+    percentage.value = 30;
     let res2 = await calculate({
         patient_id: patientData.patient_id,
         doctor: "admin",
